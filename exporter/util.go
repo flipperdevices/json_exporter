@@ -19,7 +19,6 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"math"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -57,7 +56,7 @@ func SanitizeValue(s string) (float64, error) {
 	resultErr = resultErr + "; " + fmt.Sprintf("%s", err)
 
 	if s == "<nil>" {
-		return math.NaN(), nil
+		return 0.0, nil
 	}
 	return value, fmt.Errorf(resultErr)
 }
