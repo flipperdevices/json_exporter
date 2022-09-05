@@ -1,12 +1,17 @@
-ARG ARCH="amd64"
-ARG OS="linux"
-FROM quay.io/prometheus/busybox-${OS}-${ARCH}:glibc
-LABEL maintainer="The Prometheus Authors <prometheus-developers@googlegroups.com>"
+FROM golang:alpine as builder
 
-ARG ARCH="amd64"
-ARG OS="linux"
-COPY .build/${OS}-${ARCH}/json_exporter /bin/json_exporter
+WORKDIR /app
+COPY go.mod go.sum ./
 
-EXPOSE      7979
-USER        nobody
-ENTRYPOINT  [ "/bin/json_exporter" ]
+RUN go mod download
+COPY . .
+
+RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-w -s" -a -installsuffix cgo -o /go/bin/app .
+
+
+FROM alpine
+
+COPY --from=builder /go/bin/app /go/bin/app
+
+EXPOSE 7979
+ENTRYPOINT ["/go/bin/app"]
